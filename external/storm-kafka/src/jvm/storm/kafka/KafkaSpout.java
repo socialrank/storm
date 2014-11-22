@@ -73,6 +73,11 @@ public class KafkaSpout extends BaseRichSpout {
         return this;
     }
 
+    public KafkaSpout setCommitListener(Collection<CommitListener> commitListeners) {
+        this.commitListeners = commitListeners;
+        return this;
+    }
+
     @Override
     public void open(Map conf, final TopologyContext context, final SpoutOutputCollector collector) {
         _collector = collector;

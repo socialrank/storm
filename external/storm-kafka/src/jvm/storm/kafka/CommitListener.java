@@ -1,9 +1,9 @@
 package storm.kafka;
 
-public class CommitListener {
+import java.io.Serializable;
 
-    public void onCommit(PartitionManager manager) {
+public interface CommitListener extends Serializable {
 
-    }
+    void onCommit(PartitionManager manager);
 
 }
