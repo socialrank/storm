@@ -23,6 +23,7 @@ import backtype.storm.spout.SpoutOutputCollector;
 import backtype.storm.task.TopologyContext;
 import backtype.storm.topology.OutputFieldsDeclarer;
 import backtype.storm.topology.base.BaseRichSpout;
+import com.google.common.collect.Lists;
 import kafka.message.Message;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -57,6 +58,7 @@ public class KafkaSpout extends BaseRichSpout {
     PartitionCoordinator _coordinator;
     DynamicPartitionConnections _connections;
     ZkState _state;
+    Collection<CommitListener> commitListeners = Lists.newArrayList();
 
     long _lastUpdateMs = 0;
 
@@ -64,6 +66,11 @@ public class KafkaSpout extends BaseRichSpout {
 
     public KafkaSpout(SpoutConfig spoutConf) {
         _spoutConfig = spoutConf;
+    }
+
+    public KafkaSpout addCommitListener(CommitListener commitListener) {
+        commitListeners.add(commitListener);
+        return this;
     }
 
     @Override
@@ -189,6 +196,9 @@ public class KafkaSpout extends BaseRichSpout {
         _lastUpdateMs = System.currentTimeMillis();
         for (PartitionManager manager : _coordinator.getMyManagedPartitions()) {
             manager.commit();
+            for(CommitListener commitListener : commitListeners) {
+                commitListener.onCommit(manager);
+            }
         }
     }
 
